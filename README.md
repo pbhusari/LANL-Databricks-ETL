@@ -88,7 +88,7 @@ Aggregates silver tables into business-level analytics and ML-ready tables under
 
 ## Dashboard
 
-An interactive [Cybersecurity Operations Dashboard](https://adb-7474648919518817.17.azuredatabricks.net/sql/dashboardsv3/01f1318c46f9148fb863e6e9adeb9662) built on the gold tables provides a real-time security operations view:
+An interactive Cybersecurity Operations Dashboard built on the gold tables provides a real-time security operations view:
 
 * **KPI counters** — total auth events (1.05B), failed auths (12.8M), compromised events (739), unique users (26.3K)
 * **Daily auth activity** — dual-axis trend of total, failed, and compromised authentications over 58 days
