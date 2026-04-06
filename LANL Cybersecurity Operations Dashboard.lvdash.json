@@ -1,0 +1,783 @@
+{
+  "datasets": [
+    {
+      "name": "failed_auth_events",
+      "displayName": "Failed Auth Events",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(failed_auth) as failed_auth_events\n",
+        "FROM\n",
+        "  workspace.gold_lanl.hourly_security_dashboard"
+      ]
+    },
+    {
+      "name": "total_auth_events",
+      "displayName": "Total Auth Events",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(total_auth) as total_auth_events\n",
+        "FROM\n",
+        "  workspace.gold_lanl.hourly_security_dashboard"
+      ]
+    },
+    {
+      "name": "compromised_events",
+      "displayName": "Compromised Events",
+      "queryLines": [
+        "SELECT\n",
+        "  SUM(compromised_auth) as compromised_events\n",
+        "FROM\n",
+        "  workspace.gold_lanl.hourly_security_dashboard"
+      ]
+    },
+    {
+      "name": "unique_users",
+      "displayName": "Unique Users",
+      "queryLines": [
+        "SELECT\n",
+        "  COUNT(DISTINCT src_user) as unique_users\n",
+        "FROM\n",
+        "  workspace.gold_lanl.user_daily_auth_summary"
+      ]
+    },
+    {
+      "name": "daily_auth_activity",
+      "displayName": "Daily Auth Activity",
+      "queryLines": [
+        "SELECT\n",
+        "  time_day,\n",
+        "  SUM(total_auth) as total_auth,\n",
+        "  SUM(failed_auth) as failed_auth,\n",
+        "  SUM(compromised_auth) as compromised_auth\n",
+        "FROM\n",
+        "  workspace.gold_lanl.hourly_security_dashboard\n",
+        "GROUP BY\n",
+        "  time_day\n",
+        "ORDER BY\n",
+        "  time_day"
+      ]
+    },
+    {
+      "name": "top_compromised_users",
+      "displayName": "Top Compromised Users",
+      "queryLines": [
+        "SELECT\n",
+        "  src_user,\n",
+        "  src_domain,\n",
+        "  SUM(compromised_events) as total_compromised,\n",
+        "  SUM(total_auth_events) as total_auth,\n",
+        "  ROUND(AVG(fail_rate), 4) as avg_fail_rate,\n",
+        "  SUM(distinct_dest_computers) as total_dest_computers\n",
+        "FROM\n",
+        "  workspace.gold_lanl.user_daily_auth_summary\n",
+        "WHERE\n",
+        "  compromised_events > 0\n",
+        "GROUP BY\n",
+        "  src_user,\n",
+        "  src_domain\n",
+        "ORDER BY\n",
+        "  total_compromised DESC\n",
+        "LIMIT 20"
+      ]
+    },
+    {
+      "name": "hourly_auth_pattern",
+      "displayName": "Hourly Auth Pattern",
+      "queryLines": [
+        "SELECT\n",
+        "  time_hour,\n",
+        "  AVG(total_auth) as avg_auth,\n",
+        "  AVG(failed_auth) as avg_failed\n",
+        "FROM\n",
+        "  workspace.gold_lanl.hourly_security_dashboard\n",
+        "GROUP BY\n",
+        "  time_hour\n",
+        "ORDER BY\n",
+        "  time_hour"
+      ]
+    },
+    {
+      "name": "top_computers_traffic",
+      "displayName": "Top 10 Computers by Traffic",
+      "queryLines": [
+        "SELECT\n",
+        "  source_computer,\n",
+        "  SUM(total_bytes) as total_bytes\n",
+        "FROM\n",
+        "  workspace.gold_lanl.computer_daily_network_profile\n",
+        "GROUP BY\n",
+        "  source_computer\n",
+        "ORDER BY\n",
+        "  total_bytes DESC\n",
+        "LIMIT 10"
+      ]
+    },
+    {
+      "name": "daily_network_volume",
+      "displayName": "Daily Network Volume",
+      "queryLines": [
+        "SELECT\n",
+        "  time_day,\n",
+        "  SUM(total_flows) as total_flows,\n",
+        "  SUM(total_dns_lookups) as total_dns_lookups\n",
+        "FROM\n",
+        "  workspace.gold_lanl.computer_daily_network_profile\n",
+        "GROUP BY\n",
+        "  time_day\n",
+        "ORDER BY\n",
+        "  time_day"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "1d9fa0fc",
+      "displayName": "Page 1",
+      "layout": [
+        {
+          "widget": {
+            "name": "total_auth_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "total_auth_events",
+                  "fields": [
+                    {
+                      "name": "total_auth_events",
+                      "expression": "`total_auth_events`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Total Auth Events",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_auth_events",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Total Auth Events"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "failed_auth_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "failed_auth_events",
+                  "fields": [
+                    {
+                      "name": "failed_auth_events",
+                      "expression": "`failed_auth_events`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Failed Auth Events",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "failed_auth_events",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Failed Auth Events"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "compromised_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "compromised_events",
+                  "fields": [
+                    {
+                      "name": "compromised_events",
+                      "expression": "`compromised_events`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Compromised Events",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "compromised_events",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Compromised Events"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "unique_users_counter",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "unique_users",
+                  "fields": [
+                    {
+                      "name": "unique_users",
+                      "expression": "`unique_users`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Unique Users",
+                "showTitle": true
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "unique_users",
+                  "format": {
+                    "type": "number-plain",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    },
+                    "abbreviation": "compact"
+                  },
+                  "displayName": "Unique Users"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "daily_auth_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_auth_activity",
+                  "fields": [
+                    {
+                      "name": "time_day",
+                      "expression": "`time_day`"
+                    },
+                    {
+                      "name": "total_auth",
+                      "expression": "`total_auth`"
+                    },
+                    {
+                      "name": "failed_auth",
+                      "expression": "`failed_auth`"
+                    },
+                    {
+                      "name": "compromised_auth",
+                      "expression": "`compromised_auth`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Daily Authentication Activity",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "time_day",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "total_auth",
+                        "displayName": "Total Auth"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "failed_auth",
+                        "displayName": "Failed Auth"
+                      },
+                      {
+                        "fieldName": "compromised_auth",
+                        "displayName": "Compromised Auth"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "position": "bottom"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "hourly_auth_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "hourly_auth_pattern",
+                  "fields": [
+                    {
+                      "name": "time_hour",
+                      "expression": "`time_hour`"
+                    },
+                    {
+                      "name": "avg_auth",
+                      "expression": "`avg_auth`"
+                    },
+                    {
+                      "name": "avg_failed",
+                      "expression": "`avg_failed`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Average Hourly Auth Pattern",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "time_hour",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Hour",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "avg_auth",
+                        "displayName": "Avg Auth Events"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "avg_failed",
+                        "displayName": "Avg Failed Events"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "position": "bottom"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "top_computers_bar",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_computers_traffic",
+                  "fields": [
+                    {
+                      "name": "source_computer",
+                      "expression": "`source_computer`"
+                    },
+                    {
+                      "name": "total_bytes",
+                      "expression": "`total_bytes`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 10 Computers by Network Traffic (Bytes)",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "source_computer",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Computer",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "total_bytes",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact"
+                  },
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Total Bytes",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "compromised_users_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "top_compromised_users",
+                  "fields": [
+                    {
+                      "name": "src_user",
+                      "expression": "`src_user`"
+                    },
+                    {
+                      "name": "src_domain",
+                      "expression": "`src_domain`"
+                    },
+                    {
+                      "name": "total_compromised",
+                      "expression": "`total_compromised`"
+                    },
+                    {
+                      "name": "total_auth",
+                      "expression": "`total_auth`"
+                    },
+                    {
+                      "name": "avg_fail_rate",
+                      "expression": "`avg_fail_rate`"
+                    },
+                    {
+                      "name": "total_dest_computers",
+                      "expression": "`total_dest_computers`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "Top Compromised Users",
+                "showTitle": true
+              },
+              "rowsPerPage": 25,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "src_user",
+                    "displayName": "User"
+                  },
+                  {
+                    "fieldName": "src_domain",
+                    "displayName": "Domain"
+                  },
+                  {
+                    "fieldName": "total_compromised",
+                    "displayName": "Compromised"
+                  },
+                  {
+                    "fieldName": "total_auth",
+                    "displayName": "Total Auth"
+                  },
+                  {
+                    "fieldName": "avg_fail_rate",
+                    "displayName": "Avg Fail Rate"
+                  },
+                  {
+                    "fieldName": "total_dest_computers",
+                    "displayName": "Dest Computers"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "daily_network_line",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "daily_network_volume",
+                  "fields": [
+                    {
+                      "name": "time_day",
+                      "expression": "`time_day`"
+                    },
+                    {
+                      "name": "total_flows",
+                      "expression": "`total_flows`"
+                    },
+                    {
+                      "name": "total_dns_lookups",
+                      "expression": "`total_dns_lookups`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Daily Network Flows & DNS Lookups",
+                "showTitle": true
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "time_day",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "displayName": "Day",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "primary": {
+                    "fields": [
+                      {
+                        "fieldName": "total_flows",
+                        "displayName": "Total Flows"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  },
+                  "secondary": {
+                    "fields": [
+                      {
+                        "fieldName": "total_dns_lookups",
+                        "displayName": "Total DNS Lookups"
+                      }
+                    ],
+                    "scale": {
+                      "type": "quantitative"
+                    }
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "position": "bottom"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 12,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#1B2A3D",
+        "dark": "#0D1B2A"
+      },
+      "widgetBackgroundColor": {
+        "light": "#1F3347",
+        "dark": "#152238"
+      },
+      "widgetBorderColor": {
+        "light": "#2A4A6B",
+        "dark": "#1E3A5F"
+      },
+      "fontColor": {
+        "light": "#E0E8F0",
+        "dark": "#E0E8F0"
+      },
+      "selectionColor": {
+        "light": "#4FC3F7",
+        "dark": "#4FC3F7"
+      },
+      "visualizationColors": [
+        "#4FC3F7",
+        "#FF7043",
+        "#E53935",
+        "#66BB6A",
+        "#AB47BC",
+        "#FFA726",
+        "#26C6DA",
+        "#EF5350",
+        "#42A5F5",
+        "#8D6E63"
+      ],
+      "widgetHeaderAlignment": "LEFT",
+      "fontFamily": "Arial"
+    },
+    "applyModeEnabled": false
+  }
+}
